@@ -23,7 +23,7 @@ where
 {
     fn myflatten(self) -> Flatten<Self>
     where
-        Self: Sized,
+
         Self::Item: IntoIterator,
     {
         flatten(self)

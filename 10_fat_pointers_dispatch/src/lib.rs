@@ -1,3 +1,5 @@
+mod other;
+
 pub fn strlen(s: impl AsRef<str>) -> usize {
     s.as_ref().len()
 }
@@ -26,7 +28,7 @@ pub fn strlen_string(s: String) -> usize {
 pub trait Hei {
     fn hei(&self);
 
-    fn weird() where Self: Sized {} // opt out of trait objects
+    fn weird() where Self: Sized {} // opt out of use in trait objects
 }
 
 impl Hei for &str {
