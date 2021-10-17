@@ -23,12 +23,7 @@ impl<T> Mutex<T> {
         while self
             .locked
             // compare_exchange is expensive
-            .compare_exchange_weak( 
-                UNLOCKED,
-                LOCKED, 
-                Ordering::Relaxed, 
-                Ordering::Relaxed
-                )
+            .compare_exchange_weak(UNLOCKED, LOCKED, Ordering::Relaxed, Ordering::Relaxed)
             .is_err()
         {
             // research - MESI protocol
@@ -37,20 +32,20 @@ impl<T> Mutex<T> {
             // multiple threads can have a value in shared state at the same time
             // will often see a second, inner loop:
             // if we fail to take the lock we're just going to spin and just read the value
-            // to keep lock in shared state 
+            // to keep lock in shared state
             while self.locked.load(Ordering::Relaxed) == LOCKED {
                 std::thread::yield_now();
             }
             std::thread::yield_now();
             // maybe another thread runs here - race
             // self.locked.store(LOCKED, Ordering::Relaxed);
-    
+
             // x86: CAS (compare and swap)
             // ARM: LDREX STREX (load/store exclusive)
             // - compare_exchange: impl using a loop of LDREX and STREX use when not called in loop
             // - compare_Exchange_weak: impl using LDREX STREX directly (on x86_64 it's a compare and swap) - use when calling in a loop
         }
-        
+
         // SAFETY: we hold the lock, therefore we can create a mutable reference
         let ret = f(unsafe { &mut *self.v.get() });
         self.locked.store(UNLOCKED, Ordering::Relaxed);
